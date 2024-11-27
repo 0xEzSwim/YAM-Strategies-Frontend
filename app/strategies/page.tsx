@@ -23,7 +23,7 @@ const Strategies = () => {
         return isConnected && !!userHoldings?.length;
     };
 
-    if (isStrategiesLoading) {
+    if (!strategies?.length && isStrategiesLoading) {
         return <PagePlaceholder></PagePlaceholder>;
     }
 
@@ -82,11 +82,7 @@ const Strategies = () => {
                         </TableHeader>
                         <TableBody>
                             {strategies.map((strategy, index) => (
-                                <TableRow
-                                    key={index}
-                                    className="cursor-pointer"
-                                    onClick={() => router.push(`/strategies/${strategy.shares.address}`)}
-                                >
+                                <TableRow key={index} className="cursor-pointer" onClick={() => router.push(`/strategies/${strategy.share.address}`)}>
                                     <TableCell className="font-medium">{strategy.name}</TableCell>
                                     <TableCell>
                                         <Badge variant="secondary">
@@ -108,11 +104,11 @@ const Strategies = () => {
                                             {((strategy.apy ?? 0) * 100).toFixed(2)}%
                                         </div>
                                     </TableCell>
-                                    <TableCell>{strategy.shares.supply.toFixed(2)}</TableCell>
+                                    <TableCell>{strategy.share.supply.toFixed(2)}</TableCell>
                                     {displayUserHoldings() && (
                                         <TableCell>
                                             {userHoldings[index].toFixed(2)} (~
-                                            {((userHoldings[index] / strategy.shares.supply) * 100).toFixed(2)}
+                                            {((userHoldings[index] / strategy.share.supply) * 100).toFixed(2)}
                                             %)
                                         </TableCell>
                                     )}
@@ -148,6 +144,7 @@ const useStrategies = () => {
             return;
         }
 
+        console.log(jsonResponse.data);
         return jsonResponse.data;
     };
 
@@ -192,13 +189,13 @@ const useUserHoldings = (userAddress?: `0x${string}`, strategies?: StrategyModel
         for (let index = 0; index < strategies.length; index++) {
             const strategy = strategies[index];
             const userHoldingResult: bigint = (await readContract(config.BLOCKCHAIN_CLIENT, {
-                address: strategy.shares.address,
+                address: strategy.share.address,
                 abi: strategy.contractAbi,
                 functionName: 'balanceOf',
                 args: [userAddress]
             })) as bigint;
 
-            const userHolding: number = Number(userHoldingResult) / 10 ** strategy.shares.decimals;
+            const userHolding: number = Number(userHoldingResult) / 10 ** strategy.share.decimals;
             userHoldings.push(userHolding);
         }
 

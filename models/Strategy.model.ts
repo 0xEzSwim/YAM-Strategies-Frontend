@@ -5,12 +5,12 @@ export class StrategyModel {
     description!: string;
     contractAbi!: any;
     underlyingAsset!: AssetModel;
-    shares!: AssetModel;
+    share!: AssetModel;
     isPaused!: boolean;
 
+    holdings?: { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[];
     tvl?: number;
     apy?: number;
-    holdings?: { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[];
 
     constructor(params: StrategyModel) {
         Object.assign(this, params);

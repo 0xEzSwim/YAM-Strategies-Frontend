@@ -78,7 +78,14 @@ const Strategy = () => {
     }, [pathname]);
     const { data: hash, writeContract } = useWriteContract();
     const { isLoading: isTxPending, isSuccess: isTxConfirmed, isError: isTxFailed } = useWaitForTransactionReceipt({ hash });
-    const { strategy, topHoldings, pieChartData, lastUpdate, isLoading: isStrategyLoading } = useStrategy(strategyAddress, isTxConfirmed);
+    const {
+        strategy,
+        topHoldings,
+        topHoldingsLength,
+        pieChartData,
+        lastUpdate,
+        isLoading: isStrategyLoading
+    } = useStrategy(strategyAddress, isTxConfirmed);
     const { userHolding } = useUserHolding(address, strategy, isTxConfirmed);
     const [showAllAssets, setShowAllAssets] = useState(false);
     const displayedHoldings = showAllAssets ? strategy.holdings : topHoldings;
@@ -148,7 +155,7 @@ const Strategy = () => {
                 address: strategy.underlyingAsset.address,
                 abi: erc20Abi,
                 functionName: 'approve',
-                args: [strategy.shares.address, convertNumberToBigInt(amount, strategy.underlyingAsset.decimals)]
+                args: [strategy.share.address, convertNumberToBigInt(amount, strategy.underlyingAsset.decimals)]
             },
             {
                 onError(error: any) {
@@ -170,7 +177,7 @@ const Strategy = () => {
         }
         writeContract(
             {
-                address: strategy.shares.address,
+                address: strategy.share.address,
                 abi: strategy.contractAbi,
                 functionName: 'deposit',
                 args: [convertNumberToBigInt(amount, strategy.underlyingAsset.decimals), receiver ?? address!]
@@ -196,10 +203,10 @@ const Strategy = () => {
         const addressToReceiveTokens = receiver ?? address!;
         writeContract(
             {
-                address: strategy.shares.address,
+                address: strategy.share.address,
                 abi: strategy.contractAbi,
                 functionName: 'redeem',
-                args: [convertNumberToBigInt(amount, strategy.shares.decimals), addressToReceiveTokens, addressToReceiveTokens]
+                args: [convertNumberToBigInt(amount, strategy.share.decimals), addressToReceiveTokens, addressToReceiveTokens]
             },
             {
                 onError(error: any) {
@@ -240,7 +247,7 @@ const Strategy = () => {
     };
 
     const displayHoldingsTab = (): boolean => {
-        return !!strategy?.name && !!topHoldings?.length && !!pieChartData?.length;
+        return !!strategy?.holdings?.length;
     };
 
     if (!strategy?.name && isStrategyLoading) {
@@ -299,7 +306,7 @@ const Strategy = () => {
                     <CardContent>
                         <div className="text-2xl font-bold">{userHolding.toFixed(6)}</div>
                         <div className="text-sm text-muted-foreground">
-                            You own ~{((userHolding / strategy.shares.supply) * 100).toFixed(2)}% of the supply
+                            You own ~{((userHolding / strategy.share.supply) * 100).toFixed(2)}% of the supply
                         </div>
                     </CardContent>
                 </Card>
@@ -371,7 +378,7 @@ const Strategy = () => {
                                                 <div className="flex items-center justify-center h-6 w-6 rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                                                     <Origami className="h-4" />
                                                 </div>
-                                                <span className="font-medium truncate">{strategy.shares.symbol}</span>
+                                                <span className="font-medium truncate">{strategy.share.symbol}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate">You have {userHolding.toFixed(2)}</div>
@@ -417,7 +424,7 @@ const Strategy = () => {
                                                 <div className="flex items-center justify-center h-6 w-6 rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
                                                     <Origami className="h-4" />
                                                 </div>
-                                                <span className="font-medium truncate">{strategy.shares.symbol}</span>
+                                                <span className="font-medium truncate">{strategy.share.symbol}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate">You have {userHolding.toFixed(2)}</div>
@@ -497,24 +504,26 @@ const Strategy = () => {
                                     <span>Summary</span>
                                 </div>
                             </TabsTrigger>
-                            <TabsTrigger value="compositions">
-                                <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
-                                    <PieChartIcon className="h-4 w-4" />
-                                    <span>Compositions</span>
-                                </div>
-                            </TabsTrigger>
+                            {displayHoldingsTab() && (
+                                <TabsTrigger value="compositions">
+                                    <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                                        <PieChartIcon className="h-4 w-4" />
+                                        <span>Compositions</span>
+                                    </div>
+                                </TabsTrigger>
+                            )}
                             <TabsTrigger value="fees">
                                 <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                                     <HandCoins className="h-4 w-4" />
                                     <span>Fees</span>
                                 </div>
                             </TabsTrigger>
-                            <TabsTrigger value="harvests">
+                            {/* <TabsTrigger value="harvests">
                                 <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                                     <Tractor className="h-4 w-4" />
                                     <span>Harvests</span>
                                 </div>
-                            </TabsTrigger>
+                            </TabsTrigger> */}
                         </TabsList>
                         <TabsContent value="sumary" className="m-0">
                             <div className="space-y-8">
@@ -536,10 +545,10 @@ const Strategy = () => {
                                         </Button>
                                     </div>
                                     <span className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                        Token Symbol: <code>{strategy.shares.symbol}</code>
+                                        Token Symbol: <code>{strategy.share.symbol}</code>
                                     </span>
                                     <span className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                        Circulating Supply: <code>{strategy.shares.supply}</code>
+                                        Circulating Supply: <code>{strategy.share.supply}</code>
                                     </span>
                                     <span className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                                         Status:{' '}
@@ -631,25 +640,27 @@ const Strategy = () => {
                                                         ))}
                                                     </TableBody>
                                                 </Table>
-                                                <div className="mt-4 text-center">
-                                                    <Button
-                                                        variant="outline"
-                                                        onClick={() => setShowAllAssets(!showAllAssets)}
-                                                        className="w-full md:w-auto"
-                                                    >
-                                                        {showAllAssets ? (
-                                                            <>
-                                                                <ChevronUp className="w-4 h-4 mr-2" />
-                                                                Hide other assets
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                <ChevronDown className="w-4 h-4 mr-2" />
-                                                                See all assets
-                                                            </>
-                                                        )}
-                                                    </Button>
-                                                </div>
+                                                {strategy.holdings && strategy.holdings.length > topHoldingsLength && (
+                                                    <div className="mt-4 text-center">
+                                                        <Button
+                                                            variant="outline"
+                                                            onClick={() => setShowAllAssets(!showAllAssets)}
+                                                            className="w-full md:w-auto"
+                                                        >
+                                                            {showAllAssets ? (
+                                                                <>
+                                                                    <ChevronUp className="w-4 h-4 mr-2" />
+                                                                    Hide other assets
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    <ChevronDown className="w-4 h-4 mr-2" />
+                                                                    See all assets
+                                                                </>
+                                                            )}
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -686,6 +697,7 @@ const Strategy = () => {
 
 const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) => {
     const [strategy, setStrategy] = useState({} as StrategyModel);
+    const [topHoldingsLength, setTopHoldingsLength] = useState(5);
     const [topHoldings, setTopHoldings] = useState(
         [] as { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[]
     );
@@ -727,24 +739,24 @@ const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) =
         }
         let strategy: StrategyModel = jsonResponse.data!;
         // Remove when Backend is good
-        strategy.holdings = [
-            { symbol: 'USDC', address: '0x', value: 1, amount: 2000, allocation: 0 },
-            { symbol: 'CSM-ALPHA', address: '0x', value: 14.5, amount: 100, allocation: 0 },
-            { symbol: 'CSM-BETA', address: '0x', value: 15, amount: 100, allocation: 0 },
-            { symbol: 'CSM-OMEGA', address: '0x', value: 16, amount: 100, allocation: 0 },
-            { symbol: 'CSM-GAMMA', address: '0x', value: 20, amount: 100, allocation: 0 },
-            { symbol: 'CSM-DELTA', address: '0x', value: 7.6, amount: 100, allocation: 0 },
-            { symbol: 'CSM-A', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-B', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-C', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-D', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-E', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-F', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-G', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-H', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-I', address: '0x', value: 10, amount: 10, allocation: 0 },
-            { symbol: 'CSM-J', address: '0x', value: 10, amount: 10, allocation: 0 }
-        ];
+        // strategy.holdings = [
+        //     { symbol: 'USDC', address: '0x', value: 1, amount: 2000, allocation: 0 },
+        //     { symbol: 'CSM-ALPHA', address: '0x', value: 14.5, amount: 100, allocation: 0 },
+        //     { symbol: 'CSM-BETA', address: '0x', value: 15, amount: 100, allocation: 0 },
+        //     { symbol: 'CSM-OMEGA', address: '0x', value: 16, amount: 100, allocation: 0 },
+        //     { symbol: 'CSM-GAMMA', address: '0x', value: 20, amount: 100, allocation: 0 },
+        //     { symbol: 'CSM-DELTA', address: '0x', value: 7.6, amount: 100, allocation: 0 },
+        //     { symbol: 'CSM-A', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-B', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-C', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-D', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-E', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-F', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-G', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-H', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-I', address: '0x', value: 10, amount: 10, allocation: 0 },
+        //     { symbol: 'CSM-J', address: '0x', value: 10, amount: 10, allocation: 0 }
+        // ];
         strategy = orderHoldingsByAllocation(strategy);
         return strategy;
     };
@@ -756,8 +768,8 @@ const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) =
             return;
         }
 
-        const top = _strategy.holdings!.slice(0, 5);
-        const other = _strategy.holdings!.slice(5);
+        const top = _strategy.holdings!.slice(0, topHoldingsLength);
+        const other = _strategy.holdings!.slice(topHoldingsLength);
         const otherAllocation = other.reduce((sum, holding) => sum + holding.allocation, 0);
         setStrategy(_strategy);
         setTopHoldings(top);
@@ -775,7 +787,7 @@ const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) =
         fetchData(strategyAddress).catch(console.error);
     }, [strategyAddress, isTxConfirmed]);
 
-    return { strategy, topHoldings, otherHoldings, pieChartData, lastUpdate, isLoading };
+    return { strategy, topHoldings, topHoldingsLength, otherHoldings, pieChartData, lastUpdate, isLoading };
 };
 
 const useUserHolding = (userAddress?: `0x${string}`, strategy?: StrategyModel, isTxConfirmed?: boolean) => {
@@ -784,13 +796,13 @@ const useUserHolding = (userAddress?: `0x${string}`, strategy?: StrategyModel, i
 
     const getUserStrategyHolding = async (userAddress: `0x${string}`, strategy: StrategyModel) => {
         const userHoldingResult: bigint = (await readContract(config.BLOCKCHAIN_CLIENT, {
-            address: strategy.shares.address,
+            address: strategy.share.address,
             abi: strategy.contractAbi,
             functionName: 'balanceOf',
             args: [userAddress]
         })) as bigint;
 
-        return Number(userHoldingResult) / 10 ** strategy.shares.decimals;
+        return Number(userHoldingResult) / 10 ** strategy.share.decimals;
     };
 
     const fetchData = useCallback(async (userAddress: `0x${string}`, strategy: StrategyModel) => {
@@ -877,7 +889,7 @@ const useUserUnderlyingAssetAllowance = (userAddress?: `0x${string}`, strategy?:
             address: strategy.underlyingAsset.address,
             abi: erc20Abi,
             functionName: 'allowance',
-            args: [userAddress, strategy.shares.address]
+            args: [userAddress, strategy.share.address]
         })) as bigint;
 
         return Number(allowanceResult) / 10 ** strategy.underlyingAsset.decimals;
