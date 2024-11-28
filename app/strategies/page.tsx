@@ -19,6 +19,9 @@ const Strategies = () => {
     const { strategies, kpi, lastUpdate, isLoading: isStrategiesLoading } = useStrategies();
     const { userHoldings } = useUserHoldings(address, strategies);
 
+    const numberOfActiveStrategies = (): number => {
+        return strategies.filter((strategy) => !strategy.isPaused).length;
+    };
     const displayUserHoldings = (): boolean => {
         return isConnected && !!userHoldings?.length;
     };
@@ -53,11 +56,11 @@ const Strategies = () => {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Strategies</CardTitle>
+                        <CardTitle className="text-sm font-medium">Active Strategies</CardTitle>
                         <BarChart3 className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{strategies.length}</div>
+                        <div className="text-2xl font-bold">{numberOfActiveStrategies()}</div>
                         <p className="text-xs text-muted-foreground">Across all YAM markets</p>
                     </CardContent>
                 </Card>
@@ -155,7 +158,7 @@ const useStrategies = () => {
         }
 
         let undefinedAPY: number = 0;
-        let newKpi = kpi;
+        let newKpi = { tvl: 0, apy: 0 };
         for (let index = 0; index < _strategies.length; index++) {
             const strategy = _strategies[index];
             newKpi.tvl += strategy.tvl ?? 0;

@@ -284,7 +284,7 @@ const Strategy = () => {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${(strategy.tvl ?? 0).toFixed(2)}</div>
+                        <div className="text-2xl font-bold">${((strategy.tvl ?? 0) * userUnderlyingAssetPrice).toFixed(2)}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -610,7 +610,7 @@ const Strategy = () => {
                                                     <TableHeader>
                                                         <TableRow>
                                                             <TableHead>Asset</TableHead>
-                                                            <TableHead className="text-right">Avg. Aquisition Price</TableHead>
+                                                            <TableHead className="text-right">Avg. Buying Price</TableHead>
                                                             <TableHead className="text-right">Amount</TableHead>
                                                             <TableHead className="text-right">Allocations</TableHead>
                                                         </TableRow>
@@ -737,28 +737,8 @@ const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) =
             console.error(jsonResponse.error);
             return;
         }
-        let strategy: StrategyModel = jsonResponse.data!;
-        // Remove when Backend is good
-        // strategy.holdings = [
-        //     { symbol: 'USDC', address: '0x', value: 1, amount: 2000, allocation: 0 },
-        //     { symbol: 'CSM-ALPHA', address: '0x', value: 14.5, amount: 100, allocation: 0 },
-        //     { symbol: 'CSM-BETA', address: '0x', value: 15, amount: 100, allocation: 0 },
-        //     { symbol: 'CSM-OMEGA', address: '0x', value: 16, amount: 100, allocation: 0 },
-        //     { symbol: 'CSM-GAMMA', address: '0x', value: 20, amount: 100, allocation: 0 },
-        //     { symbol: 'CSM-DELTA', address: '0x', value: 7.6, amount: 100, allocation: 0 },
-        //     { symbol: 'CSM-A', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-B', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-C', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-D', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-E', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-F', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-G', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-H', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-I', address: '0x', value: 10, amount: 10, allocation: 0 },
-        //     { symbol: 'CSM-J', address: '0x', value: 10, amount: 10, allocation: 0 }
-        // ];
-        strategy = orderHoldingsByAllocation(strategy);
-        return strategy;
+
+        return orderHoldingsByAllocation(jsonResponse.data!);
     };
 
     const fetchData = useCallback(async (strategyAddress: `0x${string}`) => {

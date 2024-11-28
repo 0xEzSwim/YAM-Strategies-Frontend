@@ -50,7 +50,7 @@ export const AppSidebar = () => {
                                 </div>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-semibold">YAM Strategies</span>
-                                    <span className="truncate text-xs">0xEzSwim &copy;2024</span>
+                                    <span className="truncate text-xs">EzSwim &copy;2024</span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>
