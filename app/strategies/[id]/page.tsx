@@ -918,7 +918,6 @@ const useToastAlert = (isTxPending?: boolean, isTxFailed?: boolean, isTxConfirme
     useEffect(() => {
         if (isTxPending) {
             const _topendingToastIdastId = toast.loading('Pending', { description: 'Transaction is pending.' });
-            console.log(_topendingToastIdastId);
             setPendingToastId(_topendingToastIdastId);
         }
 

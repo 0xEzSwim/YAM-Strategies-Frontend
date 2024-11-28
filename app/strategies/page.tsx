@@ -144,7 +144,6 @@ const useStrategies = () => {
             return;
         }
 
-        console.log(jsonResponse.data);
         return jsonResponse.data;
     };
 
