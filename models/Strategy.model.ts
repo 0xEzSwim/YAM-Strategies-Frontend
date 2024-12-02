@@ -1,4 +1,5 @@
 import { AssetModel } from './Asset.model';
+import { HoldingModel } from './Holding.model';
 
 export class StrategyModel {
     name!: string;
@@ -8,8 +9,8 @@ export class StrategyModel {
     share!: AssetModel;
     isPaused!: boolean;
 
-    holdings?: { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[];
-    tvl?: number;
+    tvl!: number;
+    holdings?: HoldingModel[];
     apy?: number;
 
     constructor(params: StrategyModel) {

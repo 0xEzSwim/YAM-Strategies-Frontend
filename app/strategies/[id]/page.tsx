@@ -32,7 +32,7 @@ import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from 'recharts';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { PagePlaceholder } from '@/components/page-placeholder';
 import { usePathname } from 'next/navigation';
-import { StrategyModel } from '@/models';
+import { HoldingModel, StrategyModel } from '@/models';
 import { erc20Abi } from 'viem';
 import { convertNumberToBigInt } from '@/lib';
 
@@ -56,7 +56,7 @@ const CustomTooltip = ({ active, payload }) => {
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: `${data.fill}` }} />
                     <span className="text-muted-foreground">{data.symbol}</span>
                 </div>
-                <p className="text-sm font-medium">{`${(data.allocation * 100).toFixed(2)}%`}</p>
+                <p className="text-sm font-medium">{`${((data.allocationPercent ?? 0) * 100).toFixed(2)}%`}</p>
             </div>
         );
     }
@@ -86,20 +86,20 @@ const Strategy = () => {
         lastUpdate,
         isLoading: isStrategyLoading
     } = useStrategy(strategyAddress, isTxConfirmed);
-    const { userHolding } = useUserHolding(address, strategy, isTxConfirmed);
+    const { userStrategyBalance, userStrategyShareAssetValue, userStrategyAssetShareValue } = useUserStrategyBalance(
+        address,
+        strategy,
+        isTxConfirmed
+    );
     const [showAllAssets, setShowAllAssets] = useState(false);
     const displayedHoldings = showAllAssets ? strategy.holdings : topHoldings;
     const [inputAmountValue, setInputAmountValue] = useState('');
     useToastAlert(isTxPending, isTxFailed, isTxConfirmed);
-    const {
-        userUnderlyingAssetBalance,
-        userUnderlyingAssetPrice,
-        isLoading: isBalanceLoading
-    } = useUserUnderlyingAssetBalance(address, strategy, isTxConfirmed);
-    const { userUnderlyingAssetAllowance, isLoading: isAllowanceLoading } = useUserUnderlyingAssetAllowance(address, strategy, isTxConfirmed);
+    const { userUnderlyingAssetBalance, userUnderlyingAssetPrice } = useUserUnderlyingAssetBalance(address, strategy, isTxConfirmed);
+    const { userUnderlyingAssetAllowance } = useUserUnderlyingAssetAllowance(address, strategy, isTxConfirmed);
     const isApprovedDisabled = !isConnected || strategy.isPaused || !inputAmountValue || parseFloat(inputAmountValue) <= 0 || isTxPending;
     const isDepositDisabled = isApprovedDisabled || parseFloat(inputAmountValue) > userUnderlyingAssetBalance;
-    const isWithdrawDisabled = isApprovedDisabled || parseFloat(inputAmountValue) > userHolding;
+    const isWithdrawDisabled = isApprovedDisabled || parseFloat(inputAmountValue) > userStrategyBalance;
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
@@ -119,24 +119,18 @@ const Strategy = () => {
         if (!isConnected) {
             return;
         }
-        setInputAmountValue(userHolding.toString());
+        setInputAmountValue(userStrategyBalance.toString());
     };
 
-    const calculateSentValue = () => {
-        const amount = parseFloat(inputAmountValue) || 0;
+    const calculateInputPrice = (isWithdraw: boolean = false) => {
+        const amount = parseFloat(!isWithdraw ? inputAmountValue : (userStrategyAssetShareValue * Number(inputAmountValue)).toString()) || 0;
         return (amount * userUnderlyingAssetPrice).toFixed(2);
     };
 
-    const calculateReceiveAmount = () => {
+    const calculateReceiveAmount = (isWithdraw: boolean = false) => {
         const amount = parseFloat(inputAmountValue) || 0;
-        const exchangeRate = 0.95;
+        const exchangeRate = !isWithdraw ? userStrategyShareAssetValue : userStrategyAssetShareValue;
         return (amount * exchangeRate).toFixed(2);
-    };
-
-    const calculateReceivedValue = () => {
-        const amount = parseFloat(calculateReceiveAmount());
-        const exchangeRate = 0.95;
-        return (userUnderlyingAssetPrice * (amount / exchangeRate)).toFixed(2);
     };
 
     //#region Approve, Deposit, WIthdraw Funds
@@ -284,7 +278,7 @@ const Strategy = () => {
                         <DollarSign className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">${((strategy.tvl ?? 0) * userUnderlyingAssetPrice).toFixed(2)}</div>
+                        <div className="text-2xl font-bold">${(strategy.tvl * userUnderlyingAssetPrice).toFixed(2)}</div>
                     </CardContent>
                 </Card>
                 <Card>
@@ -304,9 +298,9 @@ const Strategy = () => {
                         <Landmark className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{userHolding.toFixed(6)}</div>
+                        <div className="text-2xl font-bold">{userStrategyBalance.toFixed(2)}</div>
                         <div className="text-sm text-muted-foreground">
-                            You own ~{((userHolding / strategy.share.supply) * 100).toFixed(2)}% of the supply
+                            You own ~{((userStrategyBalance / strategy.share.supply) * 100).toFixed(2)}% of the supply
                         </div>
                     </CardContent>
                 </Card>
@@ -365,7 +359,7 @@ const Strategy = () => {
                                                 Max
                                             </Button>
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateSentValue()}</div>
+                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateInputPrice()}</div>
                                     </div>
                                     <div className="md:col-span-1 self-center flex justify-center gap-4">
                                         <MoveRight className="hidden md:block w-12 h-12 text-muted-foreground" />
@@ -381,7 +375,7 @@ const Strategy = () => {
                                                 <span className="font-medium truncate">{strategy.share.symbol}</span>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate">You have {userHolding.toFixed(2)}</div>
+                                        <div className="text-xs text-muted-foreground mt-1 truncate">You have {userStrategyBalance.toFixed(2)}</div>
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="text-sm font-medium mb-2 block">You will receive</label>
@@ -390,7 +384,7 @@ const Strategy = () => {
                                                 <span className="font-medium truncate">{calculateReceiveAmount()}</span>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateReceivedValue()}</div>
+                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateInputPrice()}</div>
                                     </div>
                                 </div>
                                 <div className="flex flex-col md:flex-row items-center justify-end gap-4 mt-4">
@@ -427,7 +421,7 @@ const Strategy = () => {
                                                 <span className="font-medium truncate">{strategy.share.symbol}</span>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate">You have {userHolding.toFixed(2)}</div>
+                                        <div className="text-xs text-muted-foreground mt-1 truncate">You have {userStrategyBalance.toFixed(2)}</div>
                                     </div>
                                     <div className="md:col-span-2">
                                         <label className="text-sm font-medium mb-2 block">Amount</label>
@@ -443,7 +437,7 @@ const Strategy = () => {
                                                 Max
                                             </Button>
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateSentValue()}</div>
+                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateInputPrice(true)}</div>
                                     </div>
                                     <div className="md:col-span-1 self-center flex justify-center gap-4">
                                         <MoveRight className="hidden md:block w-12 h-12 text-muted-foreground" />
@@ -474,10 +468,10 @@ const Strategy = () => {
                                         <label className="text-sm font-medium mb-2 block">You will receive</label>
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
-                                                <span className="font-medium truncate">{calculateReceiveAmount()}</span>
+                                                <span className="font-medium truncate">{calculateReceiveAmount(true)}</span>
                                             </div>
                                         </div>
-                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateReceivedValue()}</div>
+                                        <div className="text-xs text-muted-foreground mt-1 truncate">${calculateInputPrice(true)}</div>
                                     </div>
                                 </div>
                                 <div className="flex flex-col md:flex-row items-center justify-end gap-4 mt-4">
@@ -592,7 +586,7 @@ const Strategy = () => {
                                                             cy="50%"
                                                             fill="#808080"
                                                             nameKey="symbol"
-                                                            dataKey="allocation"
+                                                            dataKey="allocationPercent"
                                                         >
                                                             {pieChartData.map((entry, index) => (
                                                                 <Cell
@@ -633,9 +627,13 @@ const Strategy = () => {
                                                                         <span className="text-muted-foreground">{holding.symbol}</span>
                                                                     </div>
                                                                 </TableCell>
-                                                                <TableCell className="text-right">${holding.value}</TableCell>
+                                                                <TableCell className="text-right">
+                                                                    ${holding.value * userUnderlyingAssetPrice}
+                                                                </TableCell>
                                                                 <TableCell className="text-right">{holding.amount}</TableCell>
-                                                                <TableCell className="text-right">{(holding.allocation * 100).toFixed(2)}%</TableCell>
+                                                                <TableCell className="text-right">
+                                                                    {((holding.allocationPercent ?? 0) * 100).toFixed(2)}%
+                                                                </TableCell>
                                                             </TableRow>
                                                         ))}
                                                     </TableBody>
@@ -698,26 +696,21 @@ const Strategy = () => {
 const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) => {
     const [strategy, setStrategy] = useState({} as StrategyModel);
     const [topHoldingsLength, setTopHoldingsLength] = useState(5);
-    const [topHoldings, setTopHoldings] = useState(
-        [] as { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[]
-    );
-    const [otherHoldings, setOtherHoldings] = useState(
-        [] as { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[]
-    );
-    const [pieChartData, setPieChartData] = useState(
-        [] as { symbol: string; address: `0x${string}`; value: number; amount: number; allocation: number }[]
-    );
+    const [topHoldings, setTopHoldings] = useState([] as HoldingModel[]);
+    const [otherHoldings, setOtherHoldings] = useState([] as HoldingModel[]);
+    const [pieChartData, setPieChartData] = useState([] as HoldingModel[]);
     const [lastUpdate, setLastUpdate] = useState(new Date());
     const [isLoading, setLoading] = useState(true);
 
     const orderHoldingsByAllocation = (strategy: StrategyModel) => {
-        let strategyTvl: number = strategy.tvl ?? strategy.holdings!.reduce((sum, holding) => sum + holding.amount * holding.value, 0);
-
         strategy.holdings = strategy.holdings!.map((holding) => {
-            return { ...holding, allocation: (holding.amount * holding.value) / strategyTvl };
+            return { ...holding, allocationPercent: holding.allocation / strategy.tvl };
         });
-        strategy.holdings = [...strategy.holdings].sort((a, b) => b.allocation - a.allocation);
+        if (!strategy.holdings?.length) {
+            return strategy;
+        }
 
+        strategy.holdings = [...strategy.holdings].sort((a, b) => b.allocation - a.allocation);
         return strategy;
     };
 
@@ -770,24 +763,50 @@ const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) =
     return { strategy, topHoldings, topHoldingsLength, otherHoldings, pieChartData, lastUpdate, isLoading };
 };
 
-const useUserHolding = (userAddress?: `0x${string}`, strategy?: StrategyModel, isTxConfirmed?: boolean) => {
-    const [userHolding, setUserHolding] = useState(0);
+const useUserStrategyBalance = (userAddress?: `0x${string}`, strategy?: StrategyModel, isTxConfirmed?: boolean) => {
+    const [userStrategyBalance, setUserStrategyBalance] = useState(0);
+    const [userStrategyShareAssetValue, setUserStrategyShareAssetValue] = useState(0);
+    const [userStrategyAssetShareValue, setUserStrategyAssetShareValue] = useState(0);
     const [isLoading, setLoading] = useState(true);
 
     const getUserStrategyHolding = async (userAddress: `0x${string}`, strategy: StrategyModel) => {
-        const userHoldingResult: bigint = (await readContract(config.BLOCKCHAIN_CLIENT, {
+        const userStrategyBalanceResult: bigint = (await readContract(config.BLOCKCHAIN_CLIENT, {
             address: strategy.share.address,
             abi: strategy.contractAbi,
             functionName: 'balanceOf',
             args: [userAddress]
         })) as bigint;
 
-        return Number(userHoldingResult) / 10 ** strategy.share.decimals;
+        return Number(userStrategyBalanceResult) / 10 ** strategy.share.decimals;
+    };
+
+    const getUserStrategyShareAssetValue = async (strategy: StrategyModel) => {
+        const userStrategySharesResult: bigint = (await readContract(config.BLOCKCHAIN_CLIENT, {
+            address: strategy.share.address,
+            abi: strategy.contractAbi,
+            functionName: 'convertToShares',
+            args: [10 ** strategy.underlyingAsset.decimals]
+        })) as bigint;
+
+        return Number(userStrategySharesResult) / 10 ** strategy.share.decimals;
+    };
+
+    const getUserStrategyAssetShareValue = async (strategy: StrategyModel) => {
+        const userStrategyAssetsResult: bigint = (await readContract(config.BLOCKCHAIN_CLIENT, {
+            address: strategy.share.address,
+            abi: strategy.contractAbi,
+            functionName: 'convertToAssets',
+            args: [10 ** strategy.share.decimals]
+        })) as bigint;
+
+        return Number(userStrategyAssetsResult) / 10 ** strategy.underlyingAsset.decimals;
     };
 
     const fetchData = useCallback(async (userAddress: `0x${string}`, strategy: StrategyModel) => {
         setLoading(true);
-        setUserHolding(await getUserStrategyHolding(userAddress, strategy));
+        setUserStrategyBalance(await getUserStrategyHolding(userAddress, strategy));
+        setUserStrategyShareAssetValue(await getUserStrategyShareAssetValue(strategy));
+        setUserStrategyAssetShareValue(await getUserStrategyAssetShareValue(strategy));
         setLoading(false);
     }, []);
 
@@ -799,7 +818,7 @@ const useUserHolding = (userAddress?: `0x${string}`, strategy?: StrategyModel, i
         fetchData(userAddress, strategy).catch(console.error);
     }, [userAddress, strategy, isTxConfirmed]);
 
-    return { userHolding, isLoading };
+    return { userStrategyBalance, userStrategyShareAssetValue, userStrategyAssetShareValue, isLoading };
 };
 
 const useUserUnderlyingAssetBalance = (userAddress?: `0x${string}`, strategy?: StrategyModel, isTxConfirmed?: boolean) => {

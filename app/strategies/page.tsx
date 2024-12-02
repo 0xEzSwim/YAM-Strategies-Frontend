@@ -96,7 +96,7 @@ const Strategies = () => {
                                         </Badge>
                                     </TableCell>
                                     <TableCell>{strategy.underlyingAsset.symbol}</TableCell>
-                                    <TableCell>${(strategy.tvl ?? 0).toFixed(2)}</TableCell>
+                                    <TableCell>${strategy.tvl.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center">
                                             {strategy.apy ? (
@@ -161,7 +161,7 @@ const useStrategies = () => {
         let newKpi = { tvl: 0, apy: 0 };
         for (let index = 0; index < _strategies.length; index++) {
             const strategy = _strategies[index];
-            newKpi.tvl += strategy.tvl ?? 0;
+            newKpi.tvl += strategy.tvl;
             if (strategy.apy == undefined) {
                 undefinedAPY++;
             }
