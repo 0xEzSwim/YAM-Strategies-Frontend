@@ -3,7 +3,7 @@
 import { config } from '@/config';
 import { useCallback, useEffect, useState } from 'react';
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import { readContract } from '@wagmi/core';
+import { readContract, WaitForTransactionReceiptErrorType } from '@wagmi/core';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -77,7 +77,7 @@ const Strategy = () => {
         setStrategyAddress(paths[paths.length - 1] as `0x${string}`);
     }, [pathname]);
     const { data: hash, writeContract } = useWriteContract();
-    const { isLoading: isTxPending, isSuccess: isTxConfirmed, isError: isTxFailed } = useWaitForTransactionReceipt({ hash });
+    const { isLoading: isTxPending, isSuccess: isTxConfirmed, isError: isTxFailed, error } = useWaitForTransactionReceipt({ hash });
     const {
         strategy,
         topHoldings,
@@ -94,7 +94,7 @@ const Strategy = () => {
     const [showAllAssets, setShowAllAssets] = useState(false);
     const displayedHoldings = showAllAssets ? strategy.holdings : topHoldings;
     const [inputAmountValue, setInputAmountValue] = useState('');
-    useToastAlert(isTxPending, isTxFailed, isTxConfirmed);
+    useToastAlert(error, isTxPending, isTxFailed, isTxConfirmed);
     const { userUnderlyingAssetBalance, userUnderlyingAssetPrice } = useUserUnderlyingAssetBalance(address, strategy, isTxConfirmed);
     const { userUnderlyingAssetAllowance } = useUserUnderlyingAssetAllowance(address, strategy, isTxConfirmed);
     const isApprovedDisabled = !isConnected || strategy.isPaused || !inputAmountValue || parseFloat(inputAmountValue) <= 0 || isTxPending;
@@ -154,6 +154,7 @@ const Strategy = () => {
             {
                 onError(error: any) {
                     toast.error(error.name, { description: error.shortMessage || error.message });
+                    console.error(error);
                 }
             }
         );
@@ -179,6 +180,7 @@ const Strategy = () => {
             {
                 onError(error: any) {
                     toast.error(error.name, { description: error.shortMessage || error.message });
+                    console.error(error);
                 }
             }
         );
@@ -205,6 +207,7 @@ const Strategy = () => {
             {
                 onError(error: any) {
                     toast.error(error.name, { description: error.shortMessage || error.message });
+                    console.error(error);
                 }
             }
         );
@@ -911,7 +914,7 @@ const useUserUnderlyingAssetAllowance = (userAddress?: `0x${string}`, strategy?:
     return { userUnderlyingAssetAllowance, isLoading };
 };
 
-const useToastAlert = (isTxPending?: boolean, isTxFailed?: boolean, isTxConfirmed?: boolean) => {
+const useToastAlert = (error: WaitForTransactionReceiptErrorType | null, isTxPending?: boolean, isTxFailed?: boolean, isTxConfirmed?: boolean) => {
     const [pendingToastId, setPendingToastId] = useState<number | string>(0);
 
     useEffect(() => {
@@ -922,6 +925,7 @@ const useToastAlert = (isTxPending?: boolean, isTxFailed?: boolean, isTxConfirme
 
         if (isTxFailed) {
             toast.error('Error', { id: pendingToastId, description: 'Transaction Failed.' });
+            console.error(error);
         }
 
         if (isTxConfirmed) {
