@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { config } from '@/config';
 import { useCallback, useEffect, useState } from 'react';
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
@@ -11,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
-    Origami,
     ChevronDown,
     ArrowUpFromLine,
     ArrowDownToLine,
@@ -333,10 +333,12 @@ const Strategy = () => {
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
                                                 {strategy.underlyingAsset.logoUrl ? (
-                                                    <img
+                                                    <Image
                                                         src={strategy.underlyingAsset.logoUrl}
                                                         alt={`${strategy.underlyingAsset.symbol} logo`}
                                                         className="h-6 w-6 rounded-full bg-blue-500"
+                                                        width="64"
+                                                        height="64"
                                                     />
                                                 ) : (
                                                     <div className="h-6 w-6 rounded-full bg-blue-500" />
@@ -372,9 +374,7 @@ const Strategy = () => {
                                         <label className="text-sm font-medium mb-2 block">To vault</label>
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
-                                                <div className="flex items-center justify-center h-6 w-6 rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
-                                                    <Origami className="h-4" />
-                                                </div>
+                                                <Image src={`/logo.png`} alt={''} className="h-6 w-6" width="64" height="64" />
                                                 <span className="font-medium truncate">{strategy.share.symbol}</span>
                                             </div>
                                         </div>
@@ -418,9 +418,7 @@ const Strategy = () => {
                                         <label className="text-sm font-medium mb-2 block">From vault</label>
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
-                                                <div className="flex items-center justify-center h-6 w-6 rounded-full bg-sidebar-primary text-sidebar-primary-foreground">
-                                                    <Origami className="h-4" />
-                                                </div>
+                                                <Image src={`/logo.png`} alt={''} className="h-6 w-6" width="64" height="64" />
                                                 <span className="font-medium truncate">{strategy.share.symbol}</span>
                                             </div>
                                         </div>
@@ -452,10 +450,12 @@ const Strategy = () => {
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
                                                 {strategy.underlyingAsset.logoUrl ? (
-                                                    <img
+                                                    <Image
                                                         src={strategy.underlyingAsset.logoUrl}
                                                         alt={`${strategy.underlyingAsset.symbol} logo`}
                                                         className="h-6 w-6 rounded-full bg-blue-500"
+                                                        width="64"
+                                                        height="64"
                                                     />
                                                 ) : (
                                                     <div className="h-6 w-6 rounded-full bg-blue-500" />
@@ -509,12 +509,14 @@ const Strategy = () => {
                                     </div>
                                 </TabsTrigger>
                             )}
-                            <TabsTrigger value="fees">
-                                <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
-                                    <HandCoins className="h-4 w-4" />
-                                    <span>Fees</span>
-                                </div>
-                            </TabsTrigger>
+                            {false && (
+                                <TabsTrigger value="fees">
+                                    <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
+                                        <HandCoins className="h-4 w-4" />
+                                        <span>Fees</span>
+                                    </div>
+                                </TabsTrigger>
+                            )}
                             {/* <TabsTrigger value="harvests">
                                 <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
                                     <Tractor className="h-4 w-4" />
@@ -668,27 +670,29 @@ const Strategy = () => {
                                 </div>
                             </TabsContent>
                         )}
-                        <TabsContent value="fees" className="mt-6">
-                            <div className="space-y-6">
-                                <div>
-                                    <h3 className="text-lg font-semibold mb-4">Fees</h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div>
-                                            <div className="text-sm text-muted-foreground mb-1">Deposit/Withdrawal fee</div>
-                                            <div className="text-xl font-semibold">0%</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm text-muted-foreground mb-1">Management fee</div>
-                                            <div className="text-xl font-semibold">0%</div>
-                                        </div>
-                                        <div>
-                                            <div className="text-sm text-muted-foreground mb-1">Performance fee</div>
-                                            <div className="text-xl font-semibold">0%</div>
+                        {false && (
+                            <TabsContent value="fees" className="mt-6">
+                                <div className="space-y-6">
+                                    <div>
+                                        <h3 className="text-lg font-semibold mb-4">Fees</h3>
+                                        <div className="grid grid-cols-3 gap-4">
+                                            <div>
+                                                <div className="text-sm text-muted-foreground mb-1">Deposit/Withdrawal fee</div>
+                                                <div className="text-xl font-semibold">0%</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-muted-foreground mb-1">Management fee</div>
+                                                <div className="text-xl font-semibold">0%</div>
+                                            </div>
+                                            <div>
+                                                <div className="text-sm text-muted-foreground mb-1">Performance fee</div>
+                                                <div className="text-xl font-semibold">0%</div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </TabsContent>
+                            </TabsContent>
+                        )}
                     </Tabs>
                 </CardContent>
             </Card>
