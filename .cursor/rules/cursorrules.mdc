@@ -1,0 +1,103 @@
+---
+description: Project context, guidelines and conventions
+globs: 
+alwaysApply: false
+---
+<context>
+You are an AI embed in a project that use :
+
+-   TypeScript
+-   Node.js with Next.js
+-   React
+-   TailwindCSS and Shadcn UI </context>
+
+<style-and-structure>
+- Write concise, technical TypeScript code using functional and declarative programming patterns.
+- Avoid classes; prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., `isLoading`, `hasError`).
+- Structure files into: exported component, subcomponents, helpers, static content, and types.
+</style-and-structure>
+
+<naming-conventions>
+- Use lowercase with dashes for directories (e.g., `components/auth-wizard`).
+- Favor named exports for components.
+</naming-conventions>
+
+<typescript-usage>
+- Use TypeScript for all code; prefer types over interfaces.
+- Avoid enums; use maps instead.
+- Use functional components with TypeScript types.
+</typescript-usage>
+
+<syntax-and-formatting>
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Write declarative JSX.
+</syntax-and-formatting>
+
+<ui-and-styling>
+- Use Shadcn UI, Radix, and Tailwind for components and styling.
+- Implement responsive design with Tailwind CSS using a mobile-first approach.
+</ui-and-styling>
+
+<performance-optimization>
+- Favor `use client`, `useEffect`, and `setState`.
+- Use dynamic loading for non-critical components.
+- Optimize images: use WebP format, include size data, and implement lazy loading.
+</performance-optimization>
+
+<key-conventions>
+- Use 'use client' for Web API access in components.
+</key-conventions>
+
+<next-15-and-react-19>
+- Utilize React 19 with Client Components. Implement Prisma queries and backend logic inside `page` or `layout` files like this:
+</next-15-and-react-19>
+
+<creating-a-component>
+- You always use arrow function with named default export.
+- You always use an object "props" as the first argument of your component, and add type directly in the object.
+
+Example:
+
+```tsx
+const MyComponent = (props: { prop1: string; prop2: number }) => {
+    return <div>{props.prop1}</div>;
+};
+
+export default MyComponent;
+```
+
+</creating-a-component>
+
+<toast-example>
+If you need to use "toast", use the following example:
+
+```ts
+import { toast } from 'sonner';
+
+toast.success('Success message');
+toast.error('Error message');
+```
+
+</toast-example>
+
+<commit>
+You're commit must always follow commitizen convention.
+
+<example>
+- feat(sidebar): add sidebar user button
+- fix(sidebar): fix sidebar user button
+- refactor(sidebar): refactor sidebar user button
+- docs(sidebar): add docs for sidebar user button
+- style(sidebar): style sidebar user button
+- test(sidebar): add test for sidebar user button
+- chore(sidebar): add chore for sidebar user button
+</example>
+
+<rules>
+- Keep it short, ideally under 50 characters.
+- Explain what and why, not how.
+- Separate subject and body with a blank line.
+- Use body only in case of a big commit.
+</rules>
+</commit>

@@ -1,42 +1,76 @@
 'use client';
 
 import Image from 'next/image';
-import { Home, ChartBarIncreasing } from 'lucide-react';
+import { Home, ChartBarIncreasing, DollarSign, Store, Droplets, Handshake, Settings, HelpCircle, ChevronRight } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
     Sidebar,
     SidebarContent,
+    SidebarFooter,
     SidebarGroup,
-    SidebarGroupContent,
+    SidebarGroupLabel,
     SidebarHeader,
     SidebarMenu,
     SidebarMenuButton,
-    SidebarMenuItem
+    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubItem,
+    SidebarMenuSubButton
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 
-// Menu items.
-const items = [
-    {
-        title: 'Dashboard',
-        url: '/dashboard',
-        icon: Home
-    },
-    {
-        title: 'Strategies',
-        url: '/strategies',
-        icon: ChartBarIncreasing
-    }
-    // {
-    //     title: 'Settings',
-    //     url: '/settings',
-    //     icon: Settings
-    // },
-    // {
-    //     title: 'Help',
-    //     url: '/help',
-    //     icon: HelpCircle
-    // }
-];
+// Menu
+const data = {
+    main: [
+        {
+            title: 'Dashboard',
+            url: '/dashboard',
+            icon: Home
+        },
+        {
+            title: 'Orders',
+            url: '/orders',
+            icon: Store,
+            isActive: true,
+            items: [
+                {
+                    title: 'Sell tokens',
+                    url: '/orders/sell',
+                    icon: DollarSign
+                },
+                {
+                    title: 'Liquidity providing',
+                    url: '/orders/liquidity',
+                    icon: Droplets
+                }
+            ]
+        },
+        {
+            title: 'YAM',
+            url: '/dashboard',
+            icon: Handshake,
+            items: [
+                {
+                    title: 'Strategies',
+                    url: '/strategies',
+                    icon: ChartBarIncreasing
+                }
+            ]
+        }
+    ],
+    settings: [
+        {
+            title: 'Settings',
+            url: '/settings',
+            icon: Settings
+        },
+        {
+            title: 'Help',
+            url: '/help',
+            icon: HelpCircle
+        }
+    ]
+};
 
 export const AppSidebar = () => {
     return (
@@ -60,23 +94,63 @@ export const AppSidebar = () => {
             </SidebarHeader>
             <SidebarContent>
                 <SidebarGroup>
-                    {/* <SidebarGroupLabel>Startegy</SidebarGroupLabel> */}
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {items.map((item) => (
+                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarMenu>
+                        {data.main.map((item) =>
+                            item.items ? (
+                                <Collapsible key={item.title} asChild defaultOpen={item.isActive} className="group/collapsible">
+                                    <SidebarMenuItem>
+                                        <CollapsibleTrigger asChild>
+                                            <SidebarMenuButton tooltip={item.title}>
+                                                {item.icon && <item.icon />}
+                                                <span>{item.title}</span>
+                                                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                                            </SidebarMenuButton>
+                                        </CollapsibleTrigger>
+                                        <CollapsibleContent>
+                                            <SidebarMenuSub>
+                                                {item.items.map((subItem) => (
+                                                    <SidebarMenuSubItem key={subItem.title}>
+                                                        <SidebarMenuSubButton asChild>
+                                                            <Link href={subItem.url}>
+                                                                <subItem.icon />
+                                                                <span>{subItem.title}</span>
+                                                            </Link>
+                                                        </SidebarMenuSubButton>
+                                                    </SidebarMenuSubItem>
+                                                ))}
+                                            </SidebarMenuSub>
+                                        </CollapsibleContent>
+                                    </SidebarMenuItem>
+                                </Collapsible>
+                            ) : (
                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild>
+                                    <SidebarMenuButton asChild tooltip={item.title}>
                                         <Link href={item.url}>
-                                            <item.icon />
+                                            {item.icon && <item.icon />}
                                             <span>{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
                                 </SidebarMenuItem>
-                            ))}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
+                            )
+                        )}
+                    </SidebarMenu>
                 </SidebarGroup>
             </SidebarContent>
+            <SidebarFooter>
+                <SidebarMenu>
+                    {data.settings.map((item) => (
+                        <SidebarMenuItem key={item.title}>
+                            <SidebarMenuButton asChild>
+                                <Link href={item.url}>
+                                    <item.icon />
+                                    <span>{item.title}</span>
+                                </Link>
+                            </SidebarMenuButton>
+                        </SidebarMenuItem>
+                    ))}
+                </SidebarMenu>
+            </SidebarFooter>
         </Sidebar>
     );
 };
