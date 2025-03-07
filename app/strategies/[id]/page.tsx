@@ -54,7 +54,7 @@ const CustomTooltip = ({ active, payload }) => {
             <div className="bg-background border border-border p-2 rounded-md shadow-md">
                 <div className="flex items-center gap-1">
                     <div className="w-4 h-4 rounded-full" style={{ backgroundColor: `${data.fill}` }} />
-                    <span className="text-muted-foreground">{data.symbol}</span>
+                    <span className="text-muted-foreground">{data.shortName}</span>
                 </div>
                 <p className="text-sm font-medium">{`${((data.allocationPercent ?? 0) * 100).toFixed(2)}%`}</p>
             </div>
@@ -271,7 +271,7 @@ const Strategy = () => {
                             {strategy.isPaused ? 'Paused' : 'Active'}
                         </div>
                     </Badge>
-                    <Badge variant="secondary">{strategy.underlyingAsset.symbol}</Badge>
+                    <Badge variant="secondary">{strategy.underlyingAsset.shortName}</Badge>
                 </div>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
@@ -335,7 +335,7 @@ const Strategy = () => {
                                                 {strategy.underlyingAsset.logoUrl ? (
                                                     <Image
                                                         src={strategy.underlyingAsset.logoUrl}
-                                                        alt={`${strategy.underlyingAsset.symbol} logo`}
+                                                        alt={`${strategy.underlyingAsset.shortName} logo`}
                                                         className="h-6 w-6 rounded-full bg-blue-500"
                                                         width="64"
                                                         height="64"
@@ -343,7 +343,7 @@ const Strategy = () => {
                                                 ) : (
                                                     <div className="h-6 w-6 rounded-full bg-blue-500" />
                                                 )}
-                                                <span className="font-medium truncate">{strategy.underlyingAsset.symbol}</span>
+                                                <span className="font-medium truncate">{strategy.underlyingAsset.shortName}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate">
@@ -375,7 +375,7 @@ const Strategy = () => {
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
                                                 <Image src={`/logo.png`} alt={''} className="h-6 w-6" width="64" height="64" />
-                                                <span className="font-medium truncate">{strategy.share.symbol}</span>
+                                                <span className="font-medium truncate">{strategy.share.shortName}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate">You have {userStrategyBalance.toFixed(2)}</div>
@@ -419,7 +419,7 @@ const Strategy = () => {
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
                                                 <Image src={`/logo.png`} alt={''} className="h-6 w-6" width="64" height="64" />
-                                                <span className="font-medium truncate">{strategy.share.symbol}</span>
+                                                <span className="font-medium truncate">{strategy.share.shortName}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate">You have {userStrategyBalance.toFixed(2)}</div>
@@ -445,14 +445,13 @@ const Strategy = () => {
                                         <ArrowDown className="block md:hidden w-8 h-8 text-muted-foreground" />
                                     </div>
                                     <div className="md:col-span-2">
-                                        {/* <MoveRight className="hidden md:block w-8 h-8 text-muted-foreground" /> */}
                                         <label className="text-sm font-medium mb-2 block">To wallet</label>
                                         <div className="p-2 rounded-lg border bg-muted">
                                             <div className="flex items-center gap-2 h-7">
                                                 {strategy.underlyingAsset.logoUrl ? (
                                                     <Image
                                                         src={strategy.underlyingAsset.logoUrl}
-                                                        alt={`${strategy.underlyingAsset.symbol} logo`}
+                                                        alt={`${strategy.underlyingAsset.shortName} logo`}
                                                         className="h-6 w-6 rounded-full bg-blue-500"
                                                         width="64"
                                                         height="64"
@@ -460,7 +459,7 @@ const Strategy = () => {
                                                 ) : (
                                                     <div className="h-6 w-6 rounded-full bg-blue-500" />
                                                 )}
-                                                <span className="font-medium truncate">{strategy.underlyingAsset.symbol}</span>
+                                                <span className="font-medium truncate">{strategy.underlyingAsset.shortName}</span>
                                             </div>
                                         </div>
                                         <div className="text-xs text-muted-foreground mt-1 truncate">
@@ -517,12 +516,6 @@ const Strategy = () => {
                                     </div>
                                 </TabsTrigger>
                             )}
-                            {/* <TabsTrigger value="harvests">
-                                <div className="inline-flex items-center justify-center gap-2 whitespace-nowrap">
-                                    <Tractor className="h-4 w-4" />
-                                    <span>Harvests</span>
-                                </div>
-                            </TabsTrigger> */}
                         </TabsList>
                         <TabsContent value="sumary" className="m-0">
                             <div className="space-y-8">
@@ -544,7 +537,7 @@ const Strategy = () => {
                                         </Button>
                                     </div>
                                     <span className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                        Token Symbol: <code>{strategy.share.symbol}</code>
+                                        Token Symbol: <code>{strategy.share.shortName}</code>
                                     </span>
                                     <span className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                                         Circulating Supply: <code>{strategy.share.supply}</code>
@@ -570,7 +563,7 @@ const Strategy = () => {
                                         </Button>
                                     </div>
                                     <span className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                        Token Symbol: <code>{strategy.underlyingAsset.symbol}</code>
+                                        Token Symbol: <code>{strategy.underlyingAsset.shortName}</code>
                                     </span>
                                 </div>
                                 <div></div>
@@ -590,7 +583,7 @@ const Strategy = () => {
                                                             cx="50%"
                                                             cy="50%"
                                                             fill="#808080"
-                                                            nameKey="symbol"
+                                                            nameKey="shortName"
                                                             dataKey="allocationPercent"
                                                         >
                                                             {pieChartData.map((entry, index) => (
@@ -616,7 +609,7 @@ const Strategy = () => {
                                                     </TableHeader>
                                                     <TableBody>
                                                         {displayedHoldings!.map((holding, index) => (
-                                                            <TableRow key={holding.symbol}>
+                                                            <TableRow key={holding.shortName}>
                                                                 <TableCell>
                                                                     <div className="flex items-center gap-1">
                                                                         <div
@@ -629,7 +622,7 @@ const Strategy = () => {
                                                                                 }`
                                                                             }}
                                                                         />
-                                                                        <span className="text-muted-foreground">{holding.symbol}</span>
+                                                                        <span className="text-muted-foreground">{holding.shortName}</span>
                                                                     </div>
                                                                 </TableCell>
                                                                 <TableCell className="text-right">
@@ -668,8 +661,8 @@ const Strategy = () => {
                                         </div>
                                     </div>
                                 </div>
-                            </TabsContent>
-                        )}
+                            </div>
+                        </TabsContent>
                         {false && (
                             <TabsContent value="fees" className="mt-6">
                                 <div className="space-y-6">
@@ -754,7 +747,7 @@ const useStrategy = (strategyAddress?: `0x${string}`, isTxConfirmed?: boolean) =
         setStrategy(_strategy);
         setTopHoldings(top);
         setOtherHoldings(other);
-        setPieChartData([...top, { symbol: 'Other', address: '0x', value: 0, amount: 0, allocation: otherAllocation }]);
+        setPieChartData([...top, { shortName: 'Other', address: '0x', value: 0, amount: 0, allocation: otherAllocation }]);
         setLastUpdate(new Date());
         setLoading(false);
     }, []);

@@ -95,7 +95,7 @@ const Strategies = () => {
                                             </div>
                                         </Badge>
                                     </TableCell>
-                                    <TableCell>{strategy.underlyingAsset.symbol}</TableCell>
+                                    <TableCell>{strategy.underlyingAsset.shortName}</TableCell>
                                     <TableCell>${strategy.tvl.toFixed(2)}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center">

@@ -2,15 +2,13 @@
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useTheme } from 'next-themes';
+import { useRouter, usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Moon, Sun } from 'lucide-react';
-import { SidebarTrigger } from '@/components/ui/sidebar';
-import { Separator } from '@/components/ui/separator';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
-import { useRouter, usePathname } from 'next/navigation';
+import { Moon, Sun } from 'lucide-react';
 
-export const Header = () => {
+const Header = () => {
     const router = useRouter();
     const pathname = usePathname();
     const { setTheme } = useTheme();
@@ -18,8 +16,6 @@ export const Header = () => {
     return (
         <header className="flex shrink-0 justify-between px-4">
             <div className="flex h-16 items-center gap-2">
-                <SidebarTrigger className="-ml-1" />
-                <Separator orientation="vertical" className="mr-2 h-4" />
                 <Breadcrumb>
                     <BreadcrumbList>
                         {pathname
@@ -69,3 +65,5 @@ export const Header = () => {
         </header>
     );
 };
+
+export { Header };

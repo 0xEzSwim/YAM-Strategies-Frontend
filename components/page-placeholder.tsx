@@ -2,7 +2,7 @@
 
 import { Skeleton } from '@/components/ui/skeleton';
 
-export const PagePlaceholder = () => {
+const PagePlaceholder = () => {
     return (
         <>
             <Skeleton className="h-4 w-[250px]" />
@@ -15,3 +15,5 @@ export const PagePlaceholder = () => {
         </>
     );
 };
+
+export { PagePlaceholder };

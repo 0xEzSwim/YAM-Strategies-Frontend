@@ -1,8 +1,3 @@
----
-description: Project context, guidelines and conventions
-globs: **/*
-alwaysApply: true
----
 # Project context, guidelines and conventions
 
 <context>
@@ -66,7 +61,7 @@ npx shadcn@latest add [COMPONENT]
 ```
 This ensures proper installation of dependencies and consistent component structure.
 
-- You always use arrow function with named export.
+- You always use arrow function with named default export.
 - You always use an object "props" as the first argument of your component, and add type directly in the object.
 
 Example:
@@ -76,7 +71,7 @@ const MyComponent = (props: { prop1: string; prop2: number }) => {
     return <div>{props.prop1}</div>;
 };
 
-export { MyComponent };
+export default MyComponent;
 ```
 
 </creating-a-component>
@@ -84,7 +79,7 @@ export { MyComponent };
 <api-and-error-handling>
 For API calls and error handling in hooks, follow these conventions:
 
-1. Response Type Structure (`models/ApiResponse.model.ts`):
+1. Response Type Structure:
 ```typescript
 type ApiResponse<T> = {
     data?: T;
@@ -92,11 +87,10 @@ type ApiResponse<T> = {
 };
 ```
 
-1. API Call Function Pattern:
+2. API Call Function Pattern:
 ```typescript
-const getDataApi = async (parameter: ParameterType): Promise<ApiResponse<DataType>> => {
-    const params = new URLSearchParams({ parameter }).toString();
-    const response = await fetch(`${url}?${params}`, {
+const fetchData = async (): Promise<ApiResponse<DataType>> => {
+    const response = await fetch(url, {
         method: 'GET',
         mode: 'cors',
         headers: {
@@ -105,30 +99,26 @@ const getDataApi = async (parameter: ParameterType): Promise<ApiResponse<DataTyp
         }
     });
 
-    const jsonResponse = (await response.json()) as ApiResponse<DataType>;
+    const jsonResponse = await response.json();
 
-    if (jsonResponse.error) {
-        return { error: jsonResponse.error };
+    if (!response.ok || !jsonResponse.data) {
+        return { error: new Error('Error message') };
     }
 
     return { data: jsonResponse.data };
 };
 ```
 
-1. Hook Implementation:
+3. Hook Implementation:
 ```typescript
 const useData = () => {
     const [data, setData] = useState<DataType | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const getData = useCallback(async (prameter: ParameterType) => {
-        if (!prameter) {
-            toast.error('Missing required parameter');
-            return;
-        }
+    const getData = async () => {
         setIsLoading(true);
 
-        const response = await getDataApi();
+        const response = await fetchData();
 
         if (response.error) {
             toast.error(response.error.name, { 
@@ -136,17 +126,12 @@ const useData = () => {
             });
             console.error(response.error);
             setIsLoading(false);
-            setData(null);
             return;
         }
 
         setData(response.data);
         setIsLoading(false);
-    }, []);
-
-    useEffect(() => {
-        getData().catch(console.error);
-    }, [getData]);
+    };
 
     return { data, isLoading, getData };
 };
@@ -190,5 +175,4 @@ You're commit must always follow commitizen convention.
 - Explain what and why, not how.
 - Separate subject and body with a blank line.
 - Use body only in case of a big commit.
-</rules>
-</commit>
+</rules> 

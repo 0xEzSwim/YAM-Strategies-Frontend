@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Home, ChartBarIncreasing, DollarSign, Store, Droplets, Handshake, Settings, HelpCircle, ChevronRight } from 'lucide-react';
+import { ChartBarIncreasing, DollarSign, Store, Droplets, Handshake, HelpCircle, ChevronRight } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
     Sidebar,
@@ -15,32 +15,29 @@ import {
     SidebarMenuItem,
     SidebarMenuSub,
     SidebarMenuSubItem,
-    SidebarMenuSubButton
+    SidebarMenuSubButton,
+    useSidebar
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
+import React from 'react';
 
 // Menu
 const data = {
     main: [
         {
-            title: 'Dashboard',
-            url: '/dashboard',
-            icon: Home
-        },
-        {
-            title: 'Orders',
-            url: '/orders',
+            title: 'Token buyback',
+            url: '/buyback',
             icon: Store,
             isActive: true,
             items: [
                 {
                     title: 'Sell tokens',
-                    url: '/orders/sell',
+                    url: '/buyback/sell',
                     icon: DollarSign
                 },
                 {
                     title: 'Liquidity providing',
-                    url: '/orders/liquidity',
+                    url: '/buyback/liquidity',
                     icon: Droplets
                 }
             ]
@@ -60,11 +57,6 @@ const data = {
     ],
     settings: [
         {
-            title: 'Settings',
-            url: '/settings',
-            icon: Settings
-        },
-        {
             title: 'Help',
             url: '/help',
             icon: HelpCircle
@@ -72,9 +64,21 @@ const data = {
     ]
 };
 
-export const AppSidebar = () => {
+const AppSidebar = () => {
+    const { setOpen, state } = useSidebar();
+
+    const handleMouseEnter = () => {
+        if (state === 'collapsed') {
+            setOpen(true);
+        }
+    };
+
+    const handleMouseLeave = () => {
+        setOpen(false);
+    };
+
     return (
-        <Sidebar variant="inset" collapsible="icon">
+        <Sidebar variant="inset" collapsible="icon" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
@@ -154,3 +158,5 @@ export const AppSidebar = () => {
         </Sidebar>
     );
 };
+
+export { AppSidebar };

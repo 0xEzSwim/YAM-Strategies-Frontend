@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 import localFont from 'next/font/local';
-import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
+import './globals.css';
 import { CustomProvider } from '@/app/custom-provider';
+
+import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar';
 import { Toaster } from '@/components/ui/sonner';
 import { AppSidebar } from '@/components/app-sidebar';
-import './globals.css';
 import { Header } from '@/components/header';
 import { Loader2 } from 'lucide-react';
 
